@@ -1,6 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-xl">
+  <div class="space-y-6"> <div class="sm:mx-auto sm:w-full sm:max-w-xl">
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
         Configuración Personal
       </h2>
@@ -9,14 +8,14 @@
       </p>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-3xl"> <div class="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
-
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-3xl">
+      <div class="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
         <div class="border-b border-gray-200">
           <nav class="-mb-px flex space-x-8" aria-label="Tabs">
             <a href="#" :class="[activeTab === 'myAccount' ? 'border-gray-800 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']" @click.prevent="activeTab = 'myAccount'">Mi Cuenta</a>
             <a href="#" :class="[activeTab === 'privacySecurity' ? 'border-gray-800 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']" @click.prevent="activeTab = 'privacySecurity'">Privacidad & Seguridad</a>
             <a href="#" :class="[activeTab === 'notifications' ? 'border-gray-800 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']" @click.prevent="activeTab = 'notifications'">Notificaciones</a>
-            </nav>
+          </nav>
         </div>
 
         <div v-if="activeTab === 'myAccount'" class="mt-8 space-y-6">
@@ -86,26 +85,24 @@ import { ref, reactive } from 'vue';
 export default {
   name: 'UserSettings',
   setup() {
-    const activeTab = ref('myAccount'); // Pestaña activa por defecto
+    const activeTab = ref('myAccount');
 
     const formData = reactive({
       firstName: 'Jenny',
       lastName: 'Wilson',
       email: 'jenny@example.com',
       phoneNumber: '123-456-7890',
-      bio: "Soy un/a desarrollador/a de software apasionado/a por crear experiencias de usuario intuitivas y eficientes. Cuando no estoy programando, disfruto explorando nuevas tecnologías y pasando tiempo al aire libre.",
+      bio: "Soy un/a desarrollador/a de software apasionado/a/a por crear experiencias de usuario intuitivas y eficientes. Cuando no estoy programando, disfruto explorando nuevas tecnologías y pasando tiempo al aire libre.",
     });
 
     const handleSave = () => {
       console.log('Datos guardados:', formData);
-      // Aquí iría la lógica para enviar los datos al backend
-      // showToast('Perfil actualizado con éxito!', 'success'); // Ejemplo de uso del toast
+      alert('¡Perfil actualizado con éxito!');
     };
 
     const handleCancel = () => {
       console.log('Cancelado.');
-      // Lógica para resetear el formulario a su estado original o redirigir
-      // Puedes recargar los datos del usuario desde un store si los tienes
+      alert('Cambios cancelados.');
     };
 
     return {

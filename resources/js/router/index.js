@@ -1,6 +1,6 @@
-// resources/js/router/index.js
-
 import { createRouter, createWebHistory } from 'vue-router';
+
+import { useAuthStore } from '../stores/auth';
 
 import LandingPage from '../Pages/LandingPage.vue';
 
@@ -50,14 +50,32 @@ const routes = [
         meta: { guest: true }
     },
     {
-        path: '/', // La ruta padre será la raíz, pero el componente es el layout
-        component: AuthLayout, // Este componente tiene el sidebar y el <router-view>
+        path: '/logout',
+        name: 'logout',
+        beforeEnter: async (to, from, next) => {
+            const authStore = useAuthStore();
+            try {
+                await authStore.logout();
+                
+                next({ name: 'login' });
+            } catch (error) {
+                authStore.user = null;
+
+                authStore.isAuthenticated = false;
+
+                next({ name: 'login' });
+            }
+        }
+    },
+    {
+        path: '/',
+        component: AuthLayout,
         meta: { requiresAuth: true },
         children: [
             {
-                path: 'dashboard', // La ruta para el home del dashboard será /dashboard
-                name: 'dashboard', // Nombre de la ruta principal del dashboard
-                component: DashboardHome, // El contenido de la página de inicio del dashboard
+                path: 'dashboard',
+                name: 'dashboard',
+                component: DashboardHome,
             },
             {
                 path: 'dashboard/services', // La URL completa será /dashboard/services
@@ -74,54 +92,14 @@ const routes = [
                 name: 'UserSettings',
                 component: UserSettings,
             },
-            // Puedes agregar otras rutas que necesiten el layout aquí, por ejemplo:
-            // {
-            //     path: 'profile',
-            //     name: 'UserProfile',
-            //     component: UserProfilePage,
-            // },
-            // {
-            //     path: 'help-info', // Nueva ruta para Ayuda e Información
-            //     name: 'HelpInfo',
-            //     component: { template: '<div class="space-y-6"><h1 class="text-3xl font-bold text-gray-900">Ayuda e Información</h1><p class="text-gray-700">Contenido de ayuda aquí.</p></div>' }
-            // }
         ]
     },
-    // {
-    //     path: '/dashboard',
-    //     name: 'dashboard',
-    //     component: DashboardPage,
-    //     meta: { requiresAuth: true },
-    //     children: [
-    //         {
-    //             path: 'services',
-    //             name: 'dashboard-services',
-    //             component: ServicesPage,
-    //         },
-    //         {
-    //             path: 'appointments',
-    //             name: 'dashboard-appointments',
-    //             component: AppointmentsPage,
-    //         },
-    // //         {
-    // //     path: 'settings',
-    // //     name: 'UserSettings',
-    // //     component: UserSettings
-    // //   },
-    //     ]
-    // },
     {
         path: '/schedule-service',
         name: 'schedule-service',
         component: ScheduleServiceWizard,
         meta: { guest: true },
     },
-    // {
-    //     path: '/settings',
-    //     name: 'UserSettings',
-    //     component: UserSettings,
-    //     meta: { requiresAuth: true }
-    // },
     // {
     //     path: '/:pathMatch(.*)*', // Ruta catch-all para 404 (debe ser la última)
     //     name: 'NotFound',
@@ -134,16 +112,59 @@ const router = createRouter({
     routes, // Tus rutas definidas arriba
 });
 
-// router.beforeEach((to, from, next) => {
-//     const isAuthenticated = true; // **IMPORTANTE: Aquí debe ir tu lógica de autenticación real**
+router.beforeEach(async (to, from, next) => {
+    const authStore = useAuthStore();
 
-//     if (to.meta.requiresAuth && !isAuthenticated) {
-//         next({ name: 'login' });
-//     } else if (to.meta.guest && isAuthenticated) {
-//         next({ name: 'dashboard' });
-//     } else {
-//         next();
+    const authPageNames = ['login', 'register', 'forgot-password'];
+
+    const isAuthPage = authPageNames.includes(to.name);
+    // 1. Siempre verificar la autenticación del backend si el store no tiene estado
+    // Esto es crucial para la persistencia de la sesión al recargar la página
+    if (!authStore.isAuthenticated && authStore.user === null && !isAuthPage) {
+        await authStore.checkAuth();
+    }
+
+    // 2. Lógica de protección de rutas
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+        console.log('Redirigiendo a login: La ruta requiere autenticación y el usuario no está logueado.');
+        next({ name: 'login' });
+    } else if (to.meta.guest && authStore.isAuthenticated) {
+        console.log('Redirigiendo a dashboard: La ruta es para invitados y el usuario ya está logueado.');
+        next({ name: 'dashboard' });
+    } else {
+        next();
+    }
+});
+
+// router.beforeEach(async (to, from, next) => {
+//   const authStore = useAuthStore(); // Obtén la instancia del store
+
+//   const isAuthPage = to.name === 'login' || to.name === 'register' || to.name === 'forgot-password';
+
+//   // Asegúrate de que el estado de autenticación se verifique al cargar la app
+//   // (Esto es importante para cuando el usuario refresca la página)
+//     // if (!authStore.isAuthenticated && authStore.user === null) {
+//     if (!authStore.isAuthenticated && authStore.user === null && !isAuthPage) {
+//       // Si no estamos autenticados y no hay datos de usuario,
+//       // intentamos verificar la sesión con el backend.
+//       // Esto confiará en la cookie de sesión de Laravel Sanctum.
+//       await authStore.checkAuth();
 //     }
+
+//   // Comprueba si la ruta requiere autenticación y el usuario no está autenticado
+//   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+//     console.log('Redirigiendo a login: La ruta requiere autenticación y el usuario no está logueado.');
+//     next({ name: 'login' }); // Redirige a la página de login
+//   }
+//   // Comprueba si la ruta es para invitados y el usuario ya está autenticado
+//   else if (to.meta.guest && authStore.isAuthenticated) {
+//     console.log('Redirigiendo a dashboard: La ruta es para invitados y el usuario ya está logueado.');
+//     next({ name: 'dashboard' }); // Redirige al dashboard
+//   }
+//   // Si no hay restricciones o se cumplen, permite la navegación
+//   else {
+//     next();
+//   }
 // });
 
 // Opcional: Guardianes de navegación (ej. para redireccionar si no está autenticado)

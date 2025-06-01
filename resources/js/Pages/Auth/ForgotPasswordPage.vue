@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="mx-auto w-full max-w-md px-4">
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
         ¿Olvidaste tu contraseña?
       </h2>
@@ -9,7 +9,7 @@
       </p>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="mt-8 mx-auto w-full max-w-md px-4">
       <div class="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
         <div v-if="errors.general" class="bg-red-100 border border-red-300 text-red-600 px-4 py-3 rounded relative mb-4" role="alert">
           <span class="block sm:inline">{{ errors.general }}</span>

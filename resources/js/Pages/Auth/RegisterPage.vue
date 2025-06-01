@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="mx-auto w-full max-w-md px-4">
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
         Crear una cuenta
       </h2>
@@ -9,11 +9,15 @@
       </p>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="mt-8 mx-auto w-full max-w-md px-4">
       <div class="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
         <div v-if="errors.general" class="bg-red-100 border border-red-300 text-red-600 px-4 py-3 rounded relative mb-4" role="alert">
           <span class="block sm:inline">{{ errors.general }}</span>
         </div>
+
+        <!-- <div v-if="successMessage" class="bg-green-100 border border-green-300 text-green-600 px-4 py-3 rounded relative mb-4" role="alert">
+          <span class="block sm:inline">{{ successMessage }}</span>
+        </div> -->
 
         <form @submit.prevent="handleRegister" class="space-y-6">
           <div>
@@ -103,7 +107,7 @@
             </div>
             <p v-if="errors.password" id="password-error" class="mt-2 text-sm text-red-400">{{ errors.password }}</p>
 
-            <div class="mt-2" v-if="form.password.length > 0">
+            <!-- <div class="mt-2" v-if="form.password.length > 0">
               <div class="w-full bg-gray-200 rounded-full h-2.5">
                 <div :class="['h-2.5 rounded-full transition-all duration-300 ease-in-out', passwordStrength.color]"
                      :style="{ width: (passwordStrength.text === '' ? '0%' : (passwordStrength.text === 'Muy débil' ? '20%' : passwordStrength.text === 'Débil' ? '40%' : passwordStrength.text === 'Regular' ? '60%' : passwordStrength.text === 'Buena' ? '80%' : '100%')) }">
@@ -118,7 +122,7 @@
                 <li>Al menos un número</li>
                 <li>Al menos un símbolo (opcional)</li>
               </ul>
-            </div>
+            </div> -->
           </div>
 
           <div>
@@ -187,13 +191,13 @@
 
 <script>
 import { ref, computed } from 'vue';
-// Si estás usando Vue Router, asegúrate de importarlo para `router.push`
-// import { useRouter } from 'vue-router';
+
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'RegisterPage',
   setup() {
-    // const router = useRouter(); // Descomentar si usas Vue Router
+    const router = useRouter();
 
     const form = ref({
       name: '',
@@ -210,6 +214,8 @@ export default {
       general: ''
     });
 
+    const successMessage = ref(null);
+
     const isSubmitting = ref(false);
     
     const passwordFieldType = ref('password');
@@ -220,7 +226,6 @@ export default {
       passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
     };
 
-    // <<-- NUEVA FUNCIÓN: Para alternar la visibilidad de la confirmación de contraseña
     const togglePasswordConfirmationVisibility = () => {
       password_confirmationFieldType.value = password_confirmationFieldType.value === 'password' ? 'text' : 'password';
     };
@@ -306,43 +311,70 @@ export default {
     });
 
     const handleRegister = async () => {
-      // Volver a validar todos los campos justo antes de enviar
+      // 1. Limpiar mensajes de éxito y errores anteriores
+      errors.value = {};
+      successMessage.value = null;
+
+      // 2. Ejecutar validaciones del frontend justo antes de enviar
       validateField('name', form.value.name);
       validateField('email', form.value.email);
       validateField('password', form.value.password);
       validateField('password_confirmation', form.value.password_confirmation);
 
-      // Si el formulario no es válido o ya se está enviando, detener
+      // 3. Si el formulario no es válido o ya se está enviando, detener el proceso
       if (!isFormValid.value || isSubmitting.value) {
-        console.log('Formulario no válido o ya enviando. Deteniendo envío.');
+        console.log('Frontend Validation Failed or Already Submitting. Aborting.');
+        isSubmitting.value = false; // Deshabilitar el estado de envío si la validación del frontend falla
         return;
       }
 
       isSubmitting.value = true;
+
       try {
-        console.log('Intentando registrar usuario con:', form.value);
+        const response = await axios.post('/api/register', {
+          name: form.value.name,
+          email: form.value.email,
+          password: form.value.password,
+          password_confirmation: form.value.password_confirmation,
+        });
 
-        // *** Aquí integrarías la lógica de registro real con tu backend ***
-        // Ejemplo con una simulación de llamada API:
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simula un retraso de 2 segundos
+        successMessage.value = response.data.message || '¡Registro exitoso! Ahora puedes iniciar sesión.';
 
-        // Simulación de respuesta exitosa
-        console.log('Registro exitoso simulado!');
-        alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+        // alert(successMessage.value); // Considera reemplazar alert() por un modal o toast más amigable
 
-        // Si usas Vue Router, podrías redirigir:
-        // router.push('/dashboard');
+        form.value = {
+          name: '',
+          email: '',
+          password: '',
+          password_confirmation: '',
+        };
+
+        router.push('/login');
 
       } catch (apiError) {
-        console.error('Error durante el registro:', apiError);
-        // Manejar errores de la API (ej. correo ya registrado)
-        if (apiError.response && apiError.response.data && apiError.response.data.errors) {
-          // Errores de validación estilo Laravel
-          Object.keys(apiError.response.data.errors).forEach(key => {
-            errors.value[key] = apiError.response.data.errors[key][0]; // Toma el primer mensaje de error
-          });
+        if (apiError.response) {
+          if (apiError.response.status === 422 && apiError.response.data.errors) {
+            Object.keys(apiError.response.data.errors).forEach(key => {
+              errors.value[key] = apiError.response.data.errors[key][0];
+            });
+
+            errors.value.general = apiError.response.data.message || 'Por favor, corrige los errores del formulario.';
+          } else if (apiError.response.data && apiError.response.data.message) {
+            // Otros errores del servidor con un mensaje específico (ej. 409 Conflict, 500 Internal Server Error)
+            errors.value.general = apiError.response.data.message;
+          } else {
+            // Error genérico del servidor sin mensaje específico en data.message
+            errors.value.general = 'Ocurrió un error inesperado al registrar. Inténtalo de nuevo más tarde.';
+          }
+        } else if (apiError.request) {
+          // La solicitud fue hecha pero no se recibió respuesta
+          // Esto puede ser un problema de red, el servidor no está respondiendo,
+          // o un fallo en la solicitud OPTIONS de CORS (preflight request).
+          errors.value.general = 'No se pudo conectar con el servidor. Verifica tu conexión a internet o el estado del servidor.';
         } else {
-          errors.value.general = 'Ocurrió un error inesperado al registrar. Inténtalo de nuevo más tarde.';
+          // Algo sucedió al configurar la solicitud que provocó un Error
+          // (ej. URL mal formada en Axios, error en la configuración de Axios)
+          errors.value.general = 'Error al configurar la solicitud. Por favor, intenta de nuevo.';
         }
       } finally {
         isSubmitting.value = false;
@@ -354,18 +386,31 @@ export default {
       errors,
       isSubmitting,
       passwordFieldType,
-      password_confirmationFieldType, // <<-- EXPORTAR la nueva propiedad
+      password_confirmationFieldType,
       passwordStrength,
       isFormValid,
       togglePasswordVisibility,
-      togglePasswordConfirmationVisibility, // <<-- EXPORTAR la nueva función
+      togglePasswordConfirmationVisibility,
       validateField,
       handleRegister,
+      successMessage,
     };
   },
 };
 </script>
 
 <style scoped>
-/* No se necesitan estilos adicionales específicos aquí con Tailwind CSS */
+.error-message {
+  color: red;
+  font-size: 0.85em;
+  margin-top: 5px;
+  display: block;
+}
+
+.success-message {
+  color: green;
+  text-align: center;
+  margin-top: 15px;
+  font-weight: bold;
+}
 </style>

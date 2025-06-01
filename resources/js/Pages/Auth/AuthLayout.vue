@@ -53,12 +53,17 @@
           <!-- <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9.247a8.672 8.672 0 001.391.802c.491.246.969.465 1.42.666m-.426-.604c-.394.394-.852.748-1.391.802-.491.246-.969.465-1.42.666a.75.75 0 00-.001 1.05l.001.001a.75.75 0 001.05-.001m.001-.001a.75.75 0 00-.001-1.05zM12 12c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path></svg> -->
           Configuración
         </router-link>
-        <router-link to="/logout"
+        <button @click="handleLogout"
+                class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md font-medium text-sm">
+          <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          Cerrar Sesión
+        </button>
+        <!-- <router-link to="/logout"
                      class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md font-medium text-sm"
                      active-class="bg-gray-200 text-gray-900">
           <svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
           Cerrar Sesión
-        </router-link>
+        </router-link> -->
       </div>
     </div>
 
@@ -71,10 +76,31 @@
 <script>
 import { ref } from 'vue';
 
+import { useRouter } from 'vue-router';
+
+import { useAuthStore } from '@/stores/auth';
+
 export default {
   name: 'AuthLayout', // Renamed from DashboardPage
   setup() {
-    return {};
+    const authStore = useAuthStore();
+
+    const router = useRouter();
+
+    const handleLogout = async () => {
+      try {
+        // await authStore.logout();
+        router.push({ name: 'logout' });
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
+    };
+
+    return {
+      handleLogout,
+      authStore,
+      router,
+    };
   },
 };
 </script>

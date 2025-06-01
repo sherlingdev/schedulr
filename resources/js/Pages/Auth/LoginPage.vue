@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="mx-auto w-full max-w-md px-4">
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
         Iniciar sesión
       </h2>
@@ -9,7 +9,7 @@
       </p>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="mt-8 mx-auto w-full max-w-md px-4">
       <div class="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
         <div v-if="errors.general" class="bg-red-100 border border-red-300 text-red-600 px-4 py-3 rounded relative mb-4" role="alert">
           <span class="block sm:inline">{{ errors.general }}</span>
@@ -51,7 +51,7 @@
                 id="password"
                 name="password"
                 :type="passwordFieldType"
-                autocomplete="new-password"
+                autocomplete="current-password"
                 required
                 placeholder="Ingresa tu contraseña"
                 :class="[
@@ -77,7 +77,7 @@
             </div>
             <p v-if="errors.password" id="password-error" class="mt-2 text-sm text-red-400">{{ errors.password }}</p>
 
-            <div class="mt-2" v-if="form.password.length > 0">
+            <!-- <div class="mt-2" v-if="form.password.length > 0">
               <div class="w-full bg-gray-200 rounded-full h-2.5">
                 <div :class="['h-2.5 rounded-full transition-all duration-300 ease-in-out', passwordStrength.color]"
                      :style="{ width: (passwordStrength.text === '' ? '0%' : (passwordStrength.text === 'Muy débil' ? '20%' : passwordStrength.text === 'Débil' ? '40%' : passwordStrength.text === 'Regular' ? '60%' : passwordStrength.text === 'Buena' ? '80%' : '100%')) }">
@@ -92,16 +92,16 @@
                 <li>Al menos un número</li>
                 <li>Al menos un símbolo (opcional)</li>
               </ul>
-            </div>
+            </div> -->
           </div>
 
-          <div class="flex items-center justify-between">
+          <div class="flex items-start justify-between">
             <div class="flex items-center">
               <input
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                class="h-4 w-4 text-gray-800 focus:ring-gray-700 border-gray-300 rounded cursor-pointer"
+                class="h-4 w-4 text-gray-800 focus:ring-gray-700 border-gray-300 rounded cursor-pointer custom-checkbox"
                 v-model="form.rememberMe"
               />
               <label for="remember-me" class="ml-2 block text-sm text-gray-900 cursor-pointer">
@@ -109,7 +109,7 @@
               </label>
             </div>
 
-            <div class="text-sm">
+            <div class="text-sm text-right">
               <router-link to="/forgot-password" class="font-medium text-gray-700 hover:text-gray-900">
                 ¿Olvidaste tu contraseña?
               </router-link>
@@ -117,21 +117,23 @@
           </div>
 
           <div>
-    <button
-      type="submit"
-      :disabled="!isFormValid || isSubmitting" :class="[
-        'w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition ease-in-out duration-150',
-        !isFormValid || isSubmitting
-          ? 'bg-gray-600 cursor-not-allowed' // <--- Clases para cuando está deshabilitado
-          : 'bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700 cursor-pointer' // <--- Clases normales
-      ]"
-    >
-      <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      {{ isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión' }} </button>
-  </div>
+            <button
+              type="submit"
+              :disabled="!isFormValid || isSubmitting"
+              :class="[
+                'w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition ease-in-out duration-150',
+                !isFormValid || isSubmitting
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : 'bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700 cursor-pointer'
+              ]"
+            >
+              <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+            </button>
+          </div>
         </form>
 
         <div class="mt-6">
@@ -157,25 +159,26 @@
 
 <script>
 import { ref, computed } from 'vue';
-// import PasswordInput from '../../components/PasswordInput.vue';
+import { useAuthStore } from '../../stores/auth'; // Importa tu store de autenticación
+import { useRouter } from 'vue-router'; // Necesitas useRouter para obtener la instancia del router
 
 export default {
   name: 'LoginPage',
-  components: {
-    // PasswordInput // Registra el componente
-  },
   setup() {
-    const passwordFieldType = ref('password');
+    // Instancia del store de autenticación
+    const authStore = useAuthStore();
+    // Instancia del router
+    const router = useRouter(); // Aunque el store redirija, es buena práctica tenerlo aquí si lo necesitas para otras cosas.
 
+    const passwordFieldType = ref('password');
     const isSubmitting = ref(false);
 
     const form = ref({
       email: '',
       password: '',
-      rememberMe: false,
+      rememberMe: false, // Asegúrate de que esta propiedad se maneje en el backend si es necesaria
     });
 
-    // Objeto reactivo para almacenar los errores de validación
     const errors = ref({
       email: '',
       password: '',
@@ -186,66 +189,10 @@ export default {
       passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
     };
 
-    const handleLogin = async () => {
-      // Primero, valida el formulario completamente
-      if (!validateForm()) { // Llama a la función validateForm para una validación completa
-        console.log('Formulario no válido. Deteniendo inicio de sesión.');
-        return;
-      }
-
-      isSubmitting.value = true;
-
-      errors.value.general = '';
-
-      try {
-        console.log('Intentando iniciar sesión con:', form.value);
-
-        // *** Aquí integrarías tu lógica de autenticación real con tu backend ***
-        // Ejemplo con una simulación de llamada API:
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simula un retraso de 2 segundos
-
-        // Simulación de respuesta exitosa
-        console.log('Inicio de sesión exitoso simulado!');
-        alert('¡Inicio de sesión exitoso! Redirigiendo...');
-        // Si usas Vue Router, podrías redirigir:
-        // router.push('/dashboard');
-
-      } catch (apiError) {
-        console.error('Error durante el inicio de sesión:', apiError);
-        // Manejar errores de la API (ej. credenciales incorrectas)
-        if (apiError.response && apiError.response.data && apiError.response.data.message) {
-          errors.value.general = apiError.response.data.message; // Mensaje de error general del backend
-        } else {
-          errors.value.general = 'Ocurrió un error inesperado al iniciar sesión. Inténtalo de nuevo más tarde.';
-        }
-      } finally {
-        isSubmitting.value = false;
-      }
-    };
-
-    // En tu sección <script> de LoginPage.vue:
-const isFormValid = computed(() => {
-    // Asegura que email y password no estén vacíos y que no tengan errores de validación
-    const isEmailValid = form.value.email.trim() !== '' && errors.value.email === '';
-    const isPasswordValid = form.value.password.trim() !== '' && errors.value.password === '';
-
-    // No necesitas validar 'rememberMe' para la validez general del formulario
-    // a menos que sea un requisito específico.
-    // También verifica que no haya errores generales.
-    const noGeneralError = errors.value.general === '';
-
-    return isEmailValid && isPasswordValid && noGeneralError;
-});
-
+    // Función para validar un campo individualmente
     const validateField = (field, value) => {
-      errors.value[field] = '';
-      errors.value.general = '';
-
-      if (field === 'name') {
-        if (!value.trim()) {
-          errors.value.name = 'El nombre completo es requerido.';
-        }
-      }
+      errors.value[field] = ''; // Limpiar el error específico del campo
+      errors.value.general = ''; // Limpiar errores generales al interactuar
 
       if (field === 'email') {
         if (!value.trim()) {
@@ -258,41 +205,111 @@ const isFormValid = computed(() => {
       if (field === 'password') {
         if (!value) {
           errors.value.password = 'La contraseña es requerida.';
-        } else if (value.length < 8) {
-          errors.value.password = 'La contraseña debe tener al menos 8 caracteres.';
-        } else if (!/[A-Z]/.test(value) || !/[a-z]/.test(value) || !/[0-9]/.test(value)) {
-          errors.value.password = 'La contraseña debe contener mayúsculas, minúsculas y números.';
-        } else if (value.length > 0 && !/[^A-Za-z0-9\s]/.test(value)) { // Sugerencia de símbolo (opcional para la validación obligatoria)
-          // Puedes quitar esta línea si el símbolo es solo una sugerencia y no una regla obligatoria para el error.
-          // errors.value.password = 'La contraseña debe contener al menos un símbolo.';
+        } else if (value.length < 6) { // Para login, a menudo es menos estricta
+          errors.value.password = 'La contraseña debe tener al menos 6 caracteres.';
         }
-
-
-        // Si la confirmación de contraseña ya tiene un valor, validarla también
-        if (form.value.password_confirmation && value !== form.value.password_confirmation) {
-          errors.value.password_confirmation = 'Las contraseñas no coinciden.';
-        } else if (form.value.password_confirmation && value === form.value.password_confirmation) {
-          errors.value.password_confirmation = ''; // Limpiar si ahora coinciden
-        }
-      }
-
-      if (field === 'password_confirmation') {
-        if (!value) {
-          errors.value.password_confirmation = 'Debes confirmar tu contraseña.';
-        } else if (value !== form.value.password) {
-          errors.value.password_confirmation = 'Las contraseñas no coinciden.';
-        }
+        // No necesitas la validación completa de mayúsculas/minúsculas/números/símbolos aquí
+        // porque esa es una regla de registro, no de login.
+        // Si el backend es más estricto y da error, el catch lo manejará.
       }
     };
 
+    // Función para validar todo el formulario antes del envío
+    const validateForm = () => {
+      let isValid = true;
+      // Reinicia todos los errores específicos
+      errors.value.email = '';
+      errors.value.password = '';
+      errors.value.general = ''; // También limpia el error general antes de validar
+
+      // Validación del correo electrónico
+      if (!form.value.email) {
+        errors.value.email = 'El correo electrónico es requerido.';
+        isValid = false;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+        errors.value.email = 'Ingresa un correo electrónico válido.';
+        isValid = false;
+      }
+
+      // Validación de la contraseña
+      if (!form.value.password) {
+        errors.value.password = 'La contraseña es requerida.';
+        isValid = false;
+      } else if (form.value.password.length < 6) {
+        errors.value.password = 'La contraseña debe tener al menos 6 caracteres.';
+        isValid = false;
+      }
+
+      return isValid;
+    };
+
+
+    const handleLogin = async () => {
+      // 1. Validar el formulario en el cliente antes de enviar
+      if (!validateForm()) {
+        console.log('Formulario no válido. Deteniendo inicio de sesión.');
+        return;
+      }
+
+      isSubmitting.value = true;
+      errors.value.general = ''; // Limpia cualquier error general previo
+
+      try {
+        // 2. Llama a la acción `login` de tu store de autenticación
+        // El store se encargará de la llamada a Axios, el manejo de cookies CSRF,
+        // la actualización del estado de autenticación y la redirección.
+        await authStore.login({
+          email: form.value.email,
+          password: form.value.password,
+          remember_me: form.value.rememberMe
+        });
+
+      } catch (apiError) {
+        console.error('Error durante el inicio de sesión en el componente:', apiError);
+
+        // 3. Manejo de errores de la API (capturados desde el store)
+        if (apiError.response) {
+          // Errores de validación del backend (ej. 422 Unprocessable Entity)
+          if (apiError.response.status === 422 && apiError.response.data.errors) {
+            Object.keys(apiError.response.data.errors).forEach(key => {
+              if (errors.value[key] !== undefined) { // Solo si el campo existe en nuestro 'errors' local
+                 errors.value[key] = apiError.response.data.errors[key][0];
+              }
+            });
+            errors.value.general = apiError.response.data.message || 'Por favor, corrige los errores del formulario.';
+          }
+          // Credenciales incorrectas (ej. 401 Unauthorized)
+          else if (apiError.response.status === 401) {
+            errors.value.general = apiError.response.data.message || 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
+          }
+          // Otros errores del servidor (ej. 500 Internal Server Error)
+          else {
+            errors.value.general = apiError.response.data.message || 'Ocurrió un error inesperado. Inténtalo de nuevo.';
+          }
+        } else if (apiError.request) {
+          // La solicitud fue hecha pero no se recibió respuesta (problema de red/servidor caído)
+          errors.value.general = 'No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet o inténtalo más tarde.';
+        } else {
+          // Algo más pasó al configurar la solicitud
+          errors.value.general = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
+        }
+
+      } finally {
+        isSubmitting.value = false;
+      }
+    };
+
+
+    // La lógica de fuerza de contraseña es más relevante para el registro,
+    // pero la mantengo si decides usarla también para el login.
     const passwordStrength = computed(() => {
       const p = form.value.password;
       let strength = 0;
-      if (p.length > 7) strength++; // Longitud mínima
-      if (/[A-Z]/.test(p)) strength++; // Mayúsculas
-      if (/[a-z]/.test(p)) strength++; // Minúsculas
-      if (/[0-9]/.test(p)) strength++; // Números
-      if (/[^A-Za-z0-9\s]/.test(p)) strength++; // Símbolos (excluyendo espacios)
+      if (p.length > 7) strength++;
+      if (/[A-Z]/.test(p)) strength++;
+      if (/[a-z]/.test(p)) strength++;
+      if (/[0-9]/.test(p)) strength++;
+      if (/[^A-Za-z0-9\s]/.test(p)) strength++;
 
       switch (strength) {
         case 0: return { text: '', color: 'bg-transparent' };
@@ -305,34 +322,14 @@ const isFormValid = computed(() => {
       }
     });
 
-    // Función para validar el formulario
-    const validateForm = () => {
-      let isValid = true;
+    const isFormValid = computed(() => {
+        // Valida los campos básicos y que no haya errores específicos de campo
+        const isEmailValid = form.value.email.trim() !== '' && errors.value.email === '';
+        const isPasswordValid = form.value.password.trim() !== '' && errors.value.password === '';
 
-      // Validación del correo electrónico
-      if (!form.value.email) {
-        errors.email = 'El correo electrónico es requerido.';
-        isValid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-        errors.email = 'Ingresa un correo electrónico válido.';
-        isValid = false;
-      } else {
-        errors.email = '';
-      }
+        return isEmailValid && isPasswordValid;
+    });
 
-      // Validación de la contraseña (similar a la de registro, pero quizás menos estricta para login)
-      if (!form.value.password) {
-        errors.password = 'La contraseña es requerida.';
-        isValid = false;
-      } else if (form.value.password.length < 6) { // Por ejemplo, mínimo 6 caracteres para login
-        errors.password = 'La contraseña debe tener al menos 6 caracteres.';
-        isValid = false;
-      } else {
-        errors.password = '';
-      }
-
-      return isValid;
-    };
 
     return {
       form,
@@ -350,6 +347,7 @@ const isFormValid = computed(() => {
 </script>
 
 <style scoped>
-/* Puedes añadir estilos específicos si no usas Tailwind CSS para todo */
-/* .your-input-styles { ... } */
+.custom-checkbox {
+  accent-color: oklch(0.278 0.033 256.848);
+}
 </style>
